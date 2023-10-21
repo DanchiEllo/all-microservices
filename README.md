@@ -1,1 +1,1 @@
-# all-microservices-eureka
+# all-microservices
