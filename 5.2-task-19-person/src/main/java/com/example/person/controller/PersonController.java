@@ -21,14 +21,16 @@ public class PersonController {
     private final RestTemplate restTemplate = new RestTemplate();
 
     @GetMapping("{id}/weather")
-    public ResponseEntity<Weather> getWeather(@PathVariable int id) {
-        if (repository.existsById(id)) {
-            String location = repository.findById(id).get().getLocation();
-            Weather weather = restTemplate.getForObject("http://localhost:8083/weather?location=" + location, Weather.class);
-            return new ResponseEntity(weather, HttpStatus.OK);
-        }
-        return new ResponseEntity(null, HttpStatus.NOT_FOUND);
-    }
+public ResponseEntity<Weather> getWeather(@PathVariable int id) {
+    return repository.findById(id)
+            .map(entity -> {
+                String location = entity.getLocation();
+                String url = String.format("http://%s/weather?location=%s", locationUrl, location);
+                Weather weather = restTemplate.getForObject(url, Weather.class);
+                return new ResponseEntity<>(weather, HttpStatus.OK);
+            })
+            .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+}
 
     @GetMapping
     public Iterable<Person> findAll() {
